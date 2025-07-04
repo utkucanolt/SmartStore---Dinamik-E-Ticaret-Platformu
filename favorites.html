@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Favoriler</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body.dark-mode {
+      background-color: #121212;
+      color: #fff;
+    }
+    .dark-mode .card {
+      background-color: #1e1e1e;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <div class="d-flex justify-content-between mb-3 align-items-center">
+      <h1>⭐ Favorilerim</h1>
+      <div>
+        <button class="btn btn-dark me-2" id="darkModeBtn">🌙 Koyu Mod</button>
+        <a href="index.html" class="btn btn-primary">Ana Sayfaya Dön</a>
+      </div>
+    </div>
+
+    <div id="favorites" class="row"></div>
+  </div>
+
+  <script>
+    if (localStorage.getItem('darkMode') === 'true') {
+      document.body.classList.add('dark-mode');
+      document.getElementById('darkModeBtn').textContent = '☀️ Açık Mod';
+    }
+
+    document.getElementById('darkModeBtn').onclick = () => {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      localStorage.setItem('darkMode', isDark);
+      document.getElementById('darkModeBtn').textContent = isDark ? '☀️ Açık Mod' : '🌙 Koyu Mod';
+    };
+
+    const favsDiv = document.getElementById('favorites');
+    let favs = JSON.parse(localStorage.getItem('favorites')) || [];
+
+    function renderFavs() {
+      favsDiv.innerHTML = '';
+
+      if (favs.length === 0) {
+        favsDiv.innerHTML = `
+          <p class="text-center fs-5">Favori listenizde ürün bulunamamıştır.</p>
+          <div class="text-center mt-3">
+            <a href="index.html" class="btn btn-primary">Ana Sayfaya Dön</a>
+          </div>
+        `;
+        return;
+      }
+
+      favs.forEach((product, index) => {
+        const col = document.createElement('div');
+        col.className = 'col-md-4 mb-3';
+
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        const img = document.createElement('img');
+        img.src = product.image;
+        img.className = 'card-img-top p-3';
+        img.style.height = '250px';
+        img.style.objectFit = 'contain';
+
+        const cardBody = document.createElement('div');
+        cardBody.className = 'card-body';
+
+        const title = document.createElement('h5');
+        title.textContent = product.title;
+
+        const price = document.createElement('p');
+        price.textContent = `Fiyat: $${product.price}`;
+
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = 'Favorilerden Çıkar';
+        removeBtn.className = 'btn btn-danger btn-sm';
+        removeBtn.onclick = () => {
+          favs.splice(index, 1);
+          localStorage.setItem('favorites', JSON.stringify(favs));
+          renderFavs();
+        };
+
+        cardBody.appendChild(title);
+        cardBody.appendChild(price);
+        cardBody.appendChild(removeBtn);
+        card.appendChild(img);
+        card.appendChild(cardBody);
+        col.appendChild(card);
+        favsDiv.appendChild(col);
+      });
+    }
+
+    renderFavs();
+  </script>
+</body>
+</html>

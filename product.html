@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ürün Detayı - Baklava Design</title>
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@baklava-ui/web-components/dist/baklava-ui.esm.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@baklava-ui/web-components/dist/baklava-ui.css" />
+  <style>
+    body.dark-mode {
+      background-color: #121212;
+      color: white;
+    }
+    bl-card {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    img {
+      width: 100%;
+      height: 300px;
+      object-fit: contain;
+    }
+  </style>
+</head>
+<body style="padding: 2rem;">
+  <div>
+    <bl-card>
+      <div id="productDetail"></div>
+    </bl-card>
+    <div style="margin-top: 1rem; display:flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+      <bl-button id="darkModeBtn" variant="secondary">🌙 Koyu Mod</bl-button>
+      <bl-button variant="primary" onclick="window.location.href='cart.html'">Sepet</bl-button>
+      <bl-button variant="warning" onclick="window.location.href='favorites.html'">Favoriler</bl-button>
+      <bl-button variant="secondary" onclick="window.location.href='index.html'">Ana Sayfaya Dön</bl-button>
+    </div>
+  </div>
+
+  <script>
+    const user = localStorage.getItem('loggedInUser');
+    if (!user) window.location.href = 'login.html';
+
+    const darkModeBtn = document.getElementById('darkModeBtn');
+    if (localStorage.getItem('darkMode') === 'true') {
+      document.body.classList.add('dark-mode');
+      darkModeBtn.textContent = '☀️ Açık Mod';
+    }
+    darkModeBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      localStorage.setItem('darkMode', isDark);
+      darkModeBtn.textContent = isDark ? '☀️ Açık Mod' : '🌙 Koyu Mod';
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+
+    fetch(`https://fakestoreapi.com/products/${productId}`)
+      .then(res => res.json())
+      .then(product => {
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let favs = JSON.parse(localStorage.getItem('favorites')) || [];
+
+        const inCartItem = cart.find(p => p.id === product.id);
+        let quantity = inCartItem ? inCartItem.quantity : 0;
+
+        const isFav = favs.find(p => p.id === product.id);
+
+        const productDetail = document.getElementById('productDetail');
+
+        function updateCartControls() {
+          let cartControl = document.getElementById('cartControl');
+          if (!cartControl) {
+            cartControl = document.createElement('div');
+            cartControl.id = 'cartControl';
+            cartControl.style.marginTop = '1rem';
+            productDetail.appendChild(cartControl);
+          }
+
+          cartControl.innerHTML = '';
+
+          if (quantity === 0) {
+            const addBtn = document.createElement('bl-button');
+            addBtn.variant = 'primary';
+            addBtn.style.width = '100%';
+            addBtn.textContent = 'Sepete Ekle';
+            addBtn.addEventListener('click', () => {
+              quantity = 1;
+              updateCart();
+              updateCartControls();
+            });
+            cartControl.appendChild(addBtn);
+          } else {
+            const minusBtn = document.createElement('bl-button');
+            minusBtn.variant = 'outline';
+            minusBtn.textContent = '-';
+            minusBtn.style.marginRight = '10px';
+            minusBtn.addEventListener('click', () => {
+              quantity--;
+              if (quantity < 0) quantity = 0;
+              updateCart();
+              updateCartControls();
+            });
+
+            const qtySpan = document.createElement('span');
+            qtySpan.textContent = quantity;
+            qtySpan.style.fontWeight = 'bold';
+            qtySpan.style.fontSize = '1.3rem';
+            qtySpan.style.margin = '0 10px';
+
+            const plusBtn = document.createElement('bl-button');
+            plusBtn.variant = 'outline';
+            plusBtn.textContent = '+';
+            plusBtn.addEventListener('click', () => {
+              if (quantity < 5) {
+                quantity++;
+                updateCart();
+                updateCartControls();
+              }
+            });
+
+            cartControl.appendChild(minusBtn);
+            cartControl.appendChild(qtySpan);
+            cartControl.appendChild(plusBtn);
+          }
+        }
+
+        function updateCart() {
+          let cart = JSON.parse(localStorage.getItem('cart')) || [];
+          const index = cart.findIndex(p => p.id === product.id);
+          if (quantity === 0) {
+            if (index !== -1) cart.splice(index, 1);
+          } else if (index !== -1) {
+            cart[index].quantity = quantity;
+          } else {
+            cart.push({ ...product, quantity });
+          }
+          localStorage.setItem('cart', JSON.stringify(cart));
+        }
+
+        productDetail.innerHTML = `
+          <bl-card-header>
+            <img src="${product.image}" alt="${product.title}">
+          </bl-card-header>
+          <bl-card-body>
+            <h3>${product.title}</h3>
+            <p style="color: grey;">Kategori: ${product.category}</p>
+            <p>${product.description}</p>
+            <h4 style="color: green;">Fiyat: $${product.price}</h4>
+          </bl-card-body>
+          <bl-card-footer>
+            <bl-button id="favBtn" variant="warning" style="width: 100%;">${isFav ? 'Favoride ⭐' : 'Favorilere Ekle'}</bl-button>
+          </bl-card-footer>
+        `;
+
+        updateCartControls();
+
+        const favBtn = document.getElementById('favBtn');
+        favBtn.addEventListener('click', () => {
+          let favs = JSON.parse(localStorage.getItem('favorites')) || [];
+          const favIndex = favs.findIndex(p => p.id === product.id);
+
+          if (favIndex === -1) {
+            favs.push(product);
+            favBtn.textContent = 'Favoride ⭐';
+          } else {
+            favs.splice(favIndex, 1);
+            favBtn.textContent = 'Favorilere Ekle';
+          }
+          localStorage.setItem('favorites', JSON.stringify(favs));
+        });
+      });
+  </script>
+</body>
+</html>

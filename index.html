@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>SmartStore – Dinamik E-Ticaret Platformu</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body.dark-mode {
+      background-color: #121212;
+      color: #fff;
+    }
+
+    .dark-mode .card {
+      background-color: #1e1e1e;
+      color: #fff;
+    }
+
+    .product-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .product-card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+      z-index: 2;
+    }
+
+    /* ✅ Hover efekti sadece ürün resmi için */
+    .product-card img {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .product-card img:hover {
+      transform: scale(1.08);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h1>Ürün Listesi</h1>
+      <div>
+        <span id="welcomeMsg" class="me-3"></span>
+        <button id="logoutBtn" class="btn btn-outline-danger me-2" style="display:none;">Çıkış Yap</button>
+        <button class="btn btn-dark me-2" id="darkModeBtn">🌙 Koyu Mod</button>
+        <a href="cart.html" class="btn btn-primary me-2">🛒 Sepet</a>
+        <a href="favorites.html" class="btn btn-warning">⭐ Favoriler</a>
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <input type="text" id="searchInput" placeholder="Ürün ara..." class="form-control" />
+      </div>
+      <div class="col-md-6">
+        <select id="categorySelect" class="form-select">
+          <option value="all">Tüm Kategoriler</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="productList" class="row"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
