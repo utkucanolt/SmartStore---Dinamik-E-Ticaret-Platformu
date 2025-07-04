@@ -49,13 +49,22 @@
       </div>
     </div>
 
-    <div class="row mb-3">
-      <div class="col-md-6">
+    <div class="row mb-3 g-2">
+      <div class="col-md-4">
         <input type="text" id="searchInput" placeholder="Ürün ara..." class="form-control" />
       </div>
-      <div class="col-md-6">
+      <div class="col-md-4">
         <select id="categorySelect" class="form-select">
           <option value="all">Tüm Kategoriler</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <select id="sortSelect" class="form-select">
+          <option value="default">Sıralama</option>
+          <option value="priceAsc">Fiyata Göre Artan</option>
+          <option value="priceDesc">Fiyata Göre Azalan</option>
+          <option value="mostFavorited">En Çok Favorilenenler</option>
+          <option value="newest">Yeni Eklenenler</option>
         </select>
       </div>
     </div>

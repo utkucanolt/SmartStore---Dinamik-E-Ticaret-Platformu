@@ -119,18 +119,57 @@ function setupEventListeners() {
   if (searchInput) {
     searchInput.addEventListener('input', applyFilters);
   }
+
+  const categorySelect = document.getElementById('categorySelect');
+  if (categorySelect) {
+    categorySelect.addEventListener('change', applyFilters);
+  }
+
+  const sortSelect = document.getElementById('sortSelect');
+  if (sortSelect) {
+    sortSelect.addEventListener('change', applyFilters);
+  }
 }
 
-// ✅ Filtre uygula
+// ✅ Filtre uygula (arama, kategori ve sıralama)
 function applyFilters() {
   const searchTerm = document.getElementById('searchInput').value.toLowerCase();
   const selectedCategory = document.getElementById('categorySelect').value;
+  const sortType = document.getElementById('sortSelect').value;
 
   filteredProducts = products.filter(p => {
     const matchCategory = selectedCategory === 'all' || p.category === selectedCategory;
     const matchSearch = p.title.toLowerCase().includes(searchTerm);
     return matchCategory && matchSearch;
   });
+
+  // Sıralama işlemi
+  switch (sortType) {
+    case 'priceAsc':
+      filteredProducts.sort((a, b) => a.price - b.price);
+      break;
+    case 'priceDesc':
+      filteredProducts.sort((a, b) => b.price - a.price);
+      break;
+    case 'mostFavorited':
+      const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+      // Favorilerdeki ürünlerin ID ve sayısını tut
+      const favCounts = {};
+      favorites.forEach(fav => {
+        favCounts[fav.id] = (favCounts[fav.id] || 0) + 1;
+      });
+      // Favori sayısına göre azalan sırala (favorisi olmayanlar 0 sayılır)
+      filteredProducts.sort((a, b) => (favCounts[b.id] || 0) - (favCounts[a.id] || 0));
+      break;
+    case 'newest':
+      // API'den gelen ürünlerin "id"leri artan sırada, büyük id = yeni ürün
+      filteredProducts.sort((a, b) => b.id - a.id);
+      break;
+    default:
+      // Varsayılan sıralama: id artan sırada
+      filteredProducts.sort((a, b) => a.id - b.id);
+      break;
+  }
 
   renderProducts(filteredProducts);
 }
